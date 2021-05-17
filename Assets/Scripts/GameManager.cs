@@ -7,12 +7,15 @@ public class GameManager : MonoBehaviour
     public Transform hero;
     public float heroSpeed;
     public float heroJumpSpeed;
+    public float fallMultiplier;
+    public float lowJumpMultiplier;
 
     Rigidbody2D rbHero;
     Animator animmatorHero;
     SpriteRenderer srHero;
     CapsuleCollider2D colliderHero;
     //private bool isRunning = false;
+    private float movement;
 
     void Start()
     {
@@ -25,16 +28,12 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (IsJumping()) Debug.Log("Salta!");
-
-
-        float movement = Input.GetAxis("Horizontal");
+        movement = Input.GetAxisRaw("Horizontal");
         if (movement < 0)
         {
             srHero.flipX = true;
             animmatorHero.SetBool("isRunning", true);
-        }
-        else if (movement > 0)
+        }else if (movement > 0)
         {
             srHero.flipX = false;
             animmatorHero.SetBool("isRunning", true);
@@ -43,16 +42,33 @@ public class GameManager : MonoBehaviour
         {
             animmatorHero.SetBool("isRunning", false);
         }
+
         rbHero.velocity = new Vector2(movement * heroSpeed, rbHero.velocity.y);
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (!IsJumping()) // puede ser un or (if (!isJumping() && !isJumping <--- no esta tan bien
+        {
+            animmatorHero.SetBool("isJumping", false);
+        }
+
+        if (!IsJumping() && Input.GetKey(KeyCode.Space))
         {
             Jump();
+        }
+        
+        if (rbHero.velocity.y < 0)
+        {
+            // Esta cayendo
+            rbHero.velocity += Vector2.up * Physics2D.gravity * (fallMultiplier - 1) * Time.deltaTime;
+        }else if (rbHero.velocity.y > 0 && !Input.GetKey(KeyCode.Space))
+        {
+            rbHero.velocity += Vector2.up * Physics2D.gravity * (lowJumpMultiplier - 1  ) * Time.deltaTime;
         }
     }
 
     private void Jump()
     {
+        animmatorHero.SetBool("isJumping", true);
+        animmatorHero.SetTrigger("jump");
         rbHero.velocity = new Vector2(rbHero.velocity.x, heroJumpSpeed);
     }
 
@@ -61,7 +77,7 @@ public class GameManager : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(
             colliderHero.bounds.center,
             Vector2.down,
-            colliderHero.bounds.extents.y + 0.1f
+            colliderHero.bounds.extents.y + 0.2f
         );
 
         DebugJumpRay(hit);
@@ -82,7 +98,7 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.DrawRay(colliderHero.bounds.center,
-            Vector2.down * (colliderHero.bounds.extents.y + 0.1f),
+            Vector2.down * (colliderHero.bounds.extents.y + 0.2f),
             color);
     }
 }
