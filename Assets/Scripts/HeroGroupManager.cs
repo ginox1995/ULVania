@@ -10,13 +10,13 @@ public class HeroGroupManager : MonoBehaviour
 
 
     float nextSwitch;
-    SpriteRenderer srHero;
-    SpriteRenderer srGost;
+    GameObject srHero;
+    GameObject srGost;
     // Start is called before the first frame update
     void Start()
     {
-        srHero = hero.GetComponent<SpriteRenderer>();
-        srGost = gost.GetComponent<SpriteRenderer>();
+        srHero = hero.GetComponent<GameObject>();
+        srGost = gost.GetComponent<GameObject>();
     }
 
     // Update is called once per frame
@@ -32,8 +32,8 @@ public class HeroGroupManager : MonoBehaviour
 
     void switchHeroRender()
     {
-        srHero.enabled = !srHero.isVisible;
-        srGost.enabled = !srGost.isVisible;
+        srHero.enabled = false;
+        srGost.enabled = true;
     }
 
 }
